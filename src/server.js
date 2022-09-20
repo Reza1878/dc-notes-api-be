@@ -28,10 +28,13 @@ const ExportsValidator = require('./validator/exports');
 const uploads = require('./api/uploads');
 const StorageService = require('./services/S3/StorageService');
 const UploadsValidator = require('./validator/uploads');
+// Cache
+const CacheService = require('./services/redis/CacheService');
 
 const init = async () => {
-  const collaborationsService = new CollaborationsService();
-  const notesService = new NotesService(collaborationsService);
+  const cacheService = new CacheService();
+  const collaborationsService = new CollaborationsService(cacheService);
+  const notesService = new NotesService(collaborationsService, cacheService);
   const usersService = new UsersService();
   const authService = new AuthenticationsService();
   const storageService = new StorageService();
@@ -119,6 +122,7 @@ const init = async () => {
     }
 
     if (request.response.isServer) {
+      console.log(response);
       const newResponse = h.response({
         status: 'error',
         message: 'Maaf, terjadi kegagalan pada server kami.',
